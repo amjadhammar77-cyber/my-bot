@@ -17,7 +17,7 @@ import yt_dlp
 # =============================================
 # 🔑 8651496786:AAHjy0CNTtLXfrMT8c1YTTlFxdFEE-lizc8
 # =============================================
-BOT_TOKEN = "8651496786:AAHjy0CNTtLXfrMT8c1YTTlFxdFEE-lizc8"
+BOT_TOKEN = os.environ.get("8651496786:AAHjy0CNTtLXfrMT8c1YTTlFxdFEE-lizc8")
 
 # =============================================
 # 🌐 Supported domains
