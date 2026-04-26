@@ -17,7 +17,7 @@ import yt_dlp
 # =============================================
 # 🔑 Bot token - reads from Railway environment
 # =============================================
-BOT_TOKEN = ("8651496786:AAHjy0CNTtLXfrMT8c1YTTlFxdFEE-lizc8")
+BOT_TOKEN = "8651496786:AAHjy0CNTtLXfrMT8c1YTTlFxdFEE-lizc8"
 
 # =============================================
 # 🌐 Supported domains
