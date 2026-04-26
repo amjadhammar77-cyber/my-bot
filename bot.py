@@ -15,11 +15,9 @@ from telegram.ext import (
 import yt_dlp
 
 # =============================================
-# 🔑 8651496786:AAHjy0CNTtLXfrMT8c1YTTlFxdFEE-lizc8
+# 🔑 Bot token - reads from Railway environment
 # =============================================
-BOT_TOKEN = os.environ.get("8651496786:AAHjy0CNTtLXfrMT8c1YTTlFxdFEE-lizc8", "")
-if not BOT_TOKEN:
-    raise ValueError("BOT_TOKEN is not set!")
+BOT_TOKEN = os.environ.get("8651496786:AAHjy0CNTtLXfrMT8c1YTTlFxdFEE-lizc8")
 
 # =============================================
 # 🌐 Supported domains
@@ -54,18 +52,13 @@ SUPPORTED_DOMAINS = [
 # =============================================
 DOWNLOAD_DIR = tempfile.gettempdir()
 
+
 def get_ydl_opts(audio_only: bool = False) -> dict:
-    """
-    Build yt-dlp options dynamically.
-    Adds YouTube-specific fixes: browser headers, player_client fallbacks,
-    and retries to bypass bot detection.
-    """
     common = {
         "outtmpl": os.path.join(DOWNLOAD_DIR, "%(id)s.%(ext)s"),
         "noplaylist": True,
         "quiet": True,
         "no_warnings": True,
-        # Mimic a real browser to bypass YouTube bot checks
         "http_headers": {
             "User-Agent": (
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -74,7 +67,6 @@ def get_ydl_opts(audio_only: bool = False) -> dict:
             ),
             "Accept-Language": "en-US,en;q=0.9",
         },
-        # Use multiple YouTube clients as fallback
         "extractor_args": {
             "youtube": {
                 "player_client": ["web", "android", "ios"],
@@ -98,7 +90,7 @@ def get_ydl_opts(audio_only: bool = False) -> dict:
         common.update({
             "format": "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
             "merge_output_format": "mp4",
-            "max_filesize": 50 * 1024 * 1024,  # 50MB Telegram limit
+            "max_filesize": 50 * 1024 * 1024,
             "postprocessors": [{
                 "key": "FFmpegVideoConvertor",
                 "preferedformat": "mp4",
@@ -227,7 +219,6 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     audio_only = query.data == "dl_audio"
     mode_text = "🎵 Audio" if audio_only else "🎬 Video"
 
-    # Show loading message
     loading_msg = await query.edit_message_text(
         f"⏳ *Downloading...*\n\n"
         f"📥 Fetching {mode_text} in the best available quality\n"
@@ -244,10 +235,8 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not filepath or not os.path.exists(filepath):
             raise FileNotFoundError("File not found after download")
 
-        # Delete loading message
         await loading_msg.delete()
 
-        # Send the file
         if audio_only:
             await query.message.reply_audio(
                 audio=open(filepath, "rb"),
@@ -262,7 +251,6 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 supports_streaming=True
             )
 
-        # Clean up temp file
         os.remove(filepath)
 
     except Exception as e:
@@ -309,6 +297,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # =============================================
 def main():
     print("🤖 Starting the bot...")
+    print(f"✅ BOT_TOKEN loaded: {'Yes' if BOT_TOKEN else 'NO - Missing!'}")
 
     app = Application.builder().token(BOT_TOKEN).build()
 
