@@ -15,9 +15,9 @@ from telegram.ext import (
 import yt_dlp
 
 # =============================================
-# 🔑 Bot token - reads from Railway environment
+# 🔑 8651496786:AAHjy0CNTtLXfrMT8c1YTTlFxdFEE-lizc8
 # =============================================
-BOT_TOKEN = "8651496786:AAHjy0CNTtLXfrMT8c1YTTlFxdFEE-lizc8"
+BOT_TOKEN = os.environ.get("8651496786:AAHjy0CNTtLXfrMT8c1YTTlFxdFEE-lizc8")
 
 # =============================================
 # 🌐 Supported domains
@@ -52,52 +52,32 @@ SUPPORTED_DOMAINS = [
 # =============================================
 DOWNLOAD_DIR = tempfile.gettempdir()
 
+YDL_VIDEO_OPTS = {
+    "format": "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
+    "merge_output_format": "mp4",
+    "outtmpl": os.path.join(DOWNLOAD_DIR, "%(id)s.%(ext)s"),
+    "noplaylist": True,
+    "quiet": True,
+    "no_warnings": True,
+    "max_filesize": 50 * 1024 * 1024,  # 50MB Telegram limit
+    "postprocessors": [{
+        "key": "FFmpegVideoConvertor",
+        "preferedformat": "mp4",
+    }],
+}
 
-def get_ydl_opts(audio_only: bool = False) -> dict:
-    common = {
-        "outtmpl": os.path.join(DOWNLOAD_DIR, "%(id)s.%(ext)s"),
-        "noplaylist": True,
-        "quiet": True,
-        "no_warnings": True,
-        "http_headers": {
-            "User-Agent": (
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/124.0.0.0 Safari/537.36"
-            ),
-            "Accept-Language": "en-US,en;q=0.9",
-        },
-        "extractor_args": {
-            "youtube": {
-                "player_client": ["web", "android", "ios"],
-            }
-        },
-        "retries": 5,
-        "fragment_retries": 5,
-        "ignoreerrors": False,
-    }
-
-    if audio_only:
-        common.update({
-            "format": "bestaudio/best",
-            "postprocessors": [{
-                "key": "FFmpegExtractAudio",
-                "preferredcodec": "mp3",
-                "preferredquality": "320",
-            }],
-        })
-    else:
-        common.update({
-            "format": "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
-            "merge_output_format": "mp4",
-            "max_filesize": 50 * 1024 * 1024,
-            "postprocessors": [{
-                "key": "FFmpegVideoConvertor",
-                "preferedformat": "mp4",
-            }],
-        })
-
-    return common
+YDL_AUDIO_OPTS = {
+    "format": "bestaudio/best",
+    "outtmpl": os.path.join(DOWNLOAD_DIR, "%(id)s.%(ext)s"),
+    "noplaylist": True,
+    "quiet": True,
+    "no_warnings": True,
+    "postprocessors": [{
+        "key": "FFmpegExtractAudio",
+        "preferredcodec": "mp3",
+        "preferredquality": "320",
+    }],
+}
 
 
 # =============================================
@@ -117,7 +97,7 @@ def is_supported_url(url: str) -> bool:
 # 📥 Download function
 # =============================================
 def download_media(url: str, audio_only: bool = False) -> str | None:
-    opts = get_ydl_opts(audio_only)
+    opts = YDL_AUDIO_OPTS.copy() if audio_only else YDL_VIDEO_OPTS.copy()
     with yt_dlp.YoutubeDL(opts) as ydl:
         info = ydl.extract_info(url, download=True)
         filename = ydl.prepare_filename(info)
@@ -219,6 +199,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     audio_only = query.data == "dl_audio"
     mode_text = "🎵 Audio" if audio_only else "🎬 Video"
 
+    # Show loading message
     loading_msg = await query.edit_message_text(
         f"⏳ *Downloading...*\n\n"
         f"📥 Fetching {mode_text} in the best available quality\n"
@@ -235,8 +216,10 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not filepath or not os.path.exists(filepath):
             raise FileNotFoundError("File not found after download")
 
+        # Delete loading message
         await loading_msg.delete()
 
+        # Send the file
         if audio_only:
             await query.message.reply_audio(
                 audio=open(filepath, "rb"),
@@ -251,6 +234,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 supports_streaming=True
             )
 
+        # Clean up temp file
         os.remove(filepath)
 
     except Exception as e:
@@ -297,7 +281,6 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # =============================================
 def main():
     print("🤖 Starting the bot...")
-    print(f"✅ BOT_TOKEN loaded: {'Yes' if BOT_TOKEN else 'NO - Missing!'}")
 
     app = Application.builder().token(BOT_TOKEN).build()
 
