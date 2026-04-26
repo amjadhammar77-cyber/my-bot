@@ -1,4 +1,3 @@
-from telegram import Update
 import os
 import asyncio
 import tempfile
@@ -19,6 +18,11 @@ import yt_dlp
 # 🔑 Bot token - reads from Railway environment
 # =============================================
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
+
+# =============================================
+# 🍪 Cookies file path
+# =============================================
+COOKIES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cookies.txt")
 
 # =============================================
 # 🌐 Supported domains
@@ -77,6 +81,13 @@ def get_ydl_opts(audio_only: bool = False) -> dict:
         "fragment_retries": 5,
         "ignoreerrors": False,
     }
+
+    # Add cookies if file exists
+    if os.path.exists(COOKIES_FILE):
+        common["cookiefile"] = COOKIES_FILE
+        print(f"✅ Cookies file loaded: {COOKIES_FILE}")
+    else:
+        print("⚠️ No cookies file found, continuing without cookies")
 
     if audio_only:
         common.update({
@@ -299,6 +310,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def main():
     print("🤖 Starting the bot...")
     print(f"✅ BOT_TOKEN loaded: {'Yes' if BOT_TOKEN else 'NO - Missing!'}")
+    print(f"🍪 Cookies file exists: {os.path.exists(COOKIES_FILE)}")
 
     app = Application.builder().token(BOT_TOKEN).build()
 
@@ -308,7 +320,7 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_callback))
 
     print("✅ Bot is running! Press Ctrl+C to stop.")
-    app.run_polling(drop_pending_updates=True, allowed_updates=Update.ALL_TYPES)
+    app.run_polling(drop_pending_updates=True)
 
 
 if __name__ == "__main__":
