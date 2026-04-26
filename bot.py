@@ -17,7 +17,9 @@ import yt_dlp
 # =============================================
 # 🔑 8651496786:AAHjy0CNTtLXfrMT8c1YTTlFxdFEE-lizc8
 # =============================================
-BOT_TOKEN = os.environ.get("8651496786:AAHjy0CNTtLXfrMT8c1YTTlFxdFEE-lizc8")
+BOT_TOKEN = os.environ.get("8651496786:AAHjy0CNTtLXfrMT8c1YTTlFxdFEE-lizc8", "")
+if not BOT_TOKEN:
+    raise ValueError("BOT_TOKEN is not set!")
 
 # =============================================
 # 🌐 Supported domains
