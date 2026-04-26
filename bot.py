@@ -17,13 +17,9 @@ from telegram.ext import (
 import yt_dlp
 
 # =============================================
-# 🔑 8651496786:AAGj9Hvg2VXdika0xQC204L0-g
-
-gG16RsW-4
+# 🔑 8651496786:AAGj9Hvg2VXdika0xQC204L0-ggG16RsW-4
 # =============================================
-BOT_TOKEN = os.environ.get("8651496786:AAGj9Hvg2VXdika0xQC204L0-g
-
-gG16RsW-4")
+BOT_TOKEN = os.environ.get("8651496786:AAGj9Hvg2VXdika0xQC204L0-ggG16RsW-4")
 
 # =============================================
 # 🌐 Supported domains
