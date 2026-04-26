@@ -3,8 +3,6 @@ import asyncio
 import tempfile
 import re
 import threading
-
-from flask import Flask
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application,
