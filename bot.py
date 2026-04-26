@@ -1,3 +1,4 @@
+from telegram import Update
 import os
 import asyncio
 import tempfile
@@ -307,7 +308,7 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_callback))
 
     print("✅ Bot is running! Press Ctrl+C to stop.")
-    app.run_polling(drop_pending_updates=True)
+    app.run_polling(drop_pending_updates=True, allowed_updates=Update.ALL_TYPES)
 
 
 if __name__ == "__main__":
